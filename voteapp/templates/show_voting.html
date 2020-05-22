@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+    {% load bootstrap4 %}
+
+    <div class="row">
+        <div class="col-md-6">
+            {% if error %}
+                <h2>Oops, voting #{{ poll.id }} not found</h2>
+            {% else %}
+                <h4>{{ poll.name }}</h4>
+                <p>{{ poll.text }}</p>
+                <form action="{% url 'vote' poll.id %}" method="post" class="form-group">
+                    {% csrf_token %}
+                    {% if is_voted %}
+                        {% for option in options %}
+                            <p style="margin: 5px"> {{ option.0.text }}</p>
+                            <div style="background-color: #ECEEEF; height: 15px; border-radius: 2px">
+                                <div style="background-color: #007BFF; border-radius: 2px; height: 100%; width: {{ option.1 }}%; text-align: center; line-height: 100%; color:#FFF">
+                                    {% if option.1 %}
+                                        {{ option.1 }}%
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        {% if poll.is_checkbox %}
+                            {% for option in options %}
+                                <input type="checkbox" name="option" id="option{{ forloop.counter }}"
+                                       value="{{ option.id }}"/>
+                                <label for="option{{ forloop.counter }}">{{ option.text }} </label><br/>
+                            {% endfor %}
+                        {% else %}
+                            {% for option in options %}
+                                <input type="radio" name="option" id="option{{ forloop.counter }}"
+                                       value="{{ option.id }}"/>
+                                <label for="option{{ forloop.counter }}">{{ option.text }} </label><br/>
+                            {% endfor %}
+                        {% endif %}
+                    {% endif %}
+                    <div style="margin-top: 10px">
+                        <input type=button value="Go to main" class="btn btn-primary" onClick="location.href = '/';">
+                        {% if request.user == poll.user and not poll.is_active %}
+                            <a class="btn btn-primary" href="/poll_edit/{{ poll.id }}">Add Options</a>
+                        {% elif request.user != poll.user and not is_voted %}
+                            <input type="submit" class="btn btn-primary" value="Vote"/>
+                        {% endif %}
+
+                        {% if request.user == poll.user or request.user.is_superuser %}
+                            <a class="btn btn-danger" href="/delete/{{ poll.id }}">Delete</a>
+                        {% endif %}
+                    </div>
+                </form>
+                     <form class="form-group" action="{% url 'activate_poll' poll.id %}" method="post">
+                    {% csrf_token %}
+                    {% if request.user == poll.user and not poll.is_active and total_options > 1 %}
+                            <input type="submit" class="btn btn-primary" value="Activate"/>
+                    {% endif %}
+            </form>
+            {% endif %}
+
+
+            <form method="post" class="mb-3">
+                {% csrf_token %}
+                {% bootstrap_form add_form %}
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+            <div class="list-group">
+                {% if comments %}
+                    {% for user, text, datetime in comments %}
+                        <div class="alert alert-success" role="alert"
+                             style="background-color: #ECEEEF; border-color: #ECEEEF; color: black">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col-sm">
+                                        <h5 class="alert-heading">{{ user }}</h5>
+                                        <p>{{ text }}</p>
+                                    </div>
+                                    <div class="col-sm ">
+                                        <em class="text-right">{{ datetime }}</em>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No comments</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

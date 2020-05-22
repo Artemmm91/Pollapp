@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+    {% load bootstrap4 %}
+
+    <h5>Enter new option:</h5>
+    {% for option in options %}
+        <span class="form-control mt-3 mb-3" readonly>{{ option.text }}</span>
+    {% endfor %}
+    <form method="post" class="form-group">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        {% for form in formset %}
+            <div class="dynamic-formset mt-3">
+                {% bootstrap_form form %}
+                {{ form.DELETE }}
+            </div>
+        {% endfor %}
+        {% if check_form %}
+            {% bootstrap_form check_form %}
+        {% endif %}
+        <input type="submit" value="Save Options" class="btn btn-primary m-3"/>
+        <input type=button value="Go back" class="btn btn-primary" onClick="history.go(-1);">
+    </form>
+
+    <script>
+        $('.dynamic-formset').formset({
+            addText: 'Add',
+            addCssClass: 'btn btn-success m-1',
+            deleteText: 'Remove',
+            deleteCssClass: 'btn btn-danger m-1',
+        });
+    </script>
+{% endblock %}

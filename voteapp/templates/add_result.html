@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+    {% load bootstrap4 %}
+
+    <h1>Add new voting results</h1>
+    {% if not errors %}
+        <h1>Added post <a href="/show/{{ id }}">#{{ id }}</a></h1>
+    {% else %}
+        <h1>Something got wrong</h1>
+        Details: {{ errors }}
+    {% endif %}
+
+{% endblock %}
